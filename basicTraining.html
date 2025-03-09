@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Training</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/Luca/basicTraining.js" defer></script>
+</head>
+<body>
+    <!-- ✅ Progress Bar Container -->
+    <div class="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+    <h1>Basic Training</h1>
+    
+    <!-- Question container -->
+    <p id="question-text">Loading question...</p>
+
+    <!-- Options container -->
+    <!-- Options container -->
+    <div id="options">
+        <button id="option1" class="quiz-option"></button>
+        <button id="option2" class="quiz-option"></button>
+        <button id="option3" class="quiz-option"></button>
+        <button id="option4" class="quiz-option"></button>
+    </div>
+
+    <p id="result"></p>
+
+    <button id="finish-training" onclick="goBackToTraining()" style="display:none;">Finish Training</button>
+    <button id="retry-incorrect" onclick="retryIncorrectQuestions()" style="display: none;">
+        Retry Incorrect Questions
+    </button>
+
+</body>
+</html>
