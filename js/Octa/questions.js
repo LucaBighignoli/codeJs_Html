@@ -11,15 +11,33 @@ function generateNewQuestions() {
         .catch(error => console.error("Error generating questions:", error));
 }
 
-// Load a new question from sessionStorage for the given level
+// Load a new question for the selected level
 function loadRandomQuiz(currentLevelName) {
-    const questions = JSON.parse(sessionStorage.getItem("questions"));
-    if (!questions) return;
+    console.log(`Loading questions for level: ${currentLevelName}`);
 
-    // Filter questions based on the current level name
-    const levelQuestions = questions.filter(q => q.difficulty === currentLevelName);
+    // Retrieve questions from sessionStorage
+    let questions = JSON.parse(sessionStorage.getItem("questions"));
+
+    // ✅ Ensure questions are loaded correctly
+    if (!questions || !Array.isArray(questions)) {
+        console.error("Error: No valid questions found in sessionStorage.");
+        return;
+    }
+
+    // ✅ Get level from `sessionStorage` for Improve Mode
+    let improveMode = sessionStorage.getItem("improveMode") === "true";
+    let levelToLoad = improveMode ? sessionStorage.getItem("currentLevel") : currentLevelName;
+
+    if (!levelToLoad) {
+        console.error("Error: currentLevel is null! Fixing...");
+        levelToLoad = sessionStorage.getItem("currentLevel") || "Iron";  // ✅ Fallback to Iron
+    }
+
+    console.log(`Using level: ${levelToLoad}`);
+
+    const levelQuestions = questions.filter(q => q.difficulty === levelToLoad);
     if (levelQuestions.length === 0) {
-        console.error(`No questions found for level: ${currentLevelName}`);
+        console.error(`No questions found for level: ${levelToLoad}`);
         return;
     }
 
@@ -31,3 +49,7 @@ function loadRandomQuiz(currentLevelName) {
     document.getElementById("answer-input").value = "";
     document.getElementById("feedback").innerText = "";
 }
+
+
+
+

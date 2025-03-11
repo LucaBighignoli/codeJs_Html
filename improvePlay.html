@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MathMind - Improve Your Time</title>
     <link rel="stylesheet" href="css/octas.css">
-    <!-- Link to improvePlay.js in js/Octa -->
     <script src="js/Octa/improvePlay.js" defer></script>
 </head>
 <body>
@@ -17,40 +16,5 @@
 <div id="level-buttons">
     <h2>Choose a Level to Improve:</h2>
 </div>
-
-<script>
-    const levelNames = ["Iron", "Bronze", "Silver", "Gold", "Diamond"];
-
-    // Display level buttons based on completed levels
-    function displayLevelButtons() {
-        const levelButtons = document.getElementById("level-buttons");
-        const bestTimes = JSON.parse(localStorage.getItem("bestTimes")) || {};
-
-        levelNames.forEach((level, index) => {
-            if (bestTimes[level]) {
-                const bestTime = bestTimes[level] || "--:--";
-                const button = document.createElement("button");
-                button.innerText = `${level} (Best Time: ${bestTime} seconds)`;
-                button.onclick = () => startLevel(level);
-                levelButtons.appendChild(button);
-            }
-        });
-    }
-
-    // Start a level to improve the time
-    function startLevel(level) {
-        console.log(`Starting ${level} level...`);
-        localStorage.setItem("currentLevel", level);
-        window.location.href = "randomPlay.html";
-    }
-
-    // Go back to the main menu
-    function goBack() {
-        window.location.href = "Home.html";
-    }
-
-    // Display level buttons on page load
-    document.addEventListener("DOMContentLoaded", displayLevelButtons);
-</script>
 </body>
 </html>
