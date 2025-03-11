@@ -32,7 +32,7 @@ def generate_options(correct_answer):
     random.shuffle(options)
     
     return options
-    
+
 
 questions = []
 id_counter = 1
@@ -83,12 +83,12 @@ for op in operations:
                     b = random.randint(2, 6)
                     lower, upper = 1, 36
                 elif diff == "Medium":
-                    a = random.randint(7, 12)
-                    b = random.randint(7, 12)
+                    a = random.randint(7, 14)
+                    b = random.randint(7, 14)
                     lower, upper = 1, 144
                 elif diff == "Difficult":
-                    a = random.randint(13, 20)
-                    b = random.randint(13, 20)
+                    a = random.randint(15, 23)
+                    b = random.randint(15, 23)
                     lower, upper = 1, 400
                 question_text = f"What is {a} × {b}?"
                 answer = a * b
@@ -100,12 +100,12 @@ for op in operations:
                     a = b * random.randint(2, 6)
                     lower, upper = 1, 20
                 elif diff == "Medium":
-                    b = random.randint(2, 10)
-                    a = b * random.randint(5, 12)
+                    b = random.randint(5, 13)
+                    a = b * random.randint(7,15)
                     lower, upper = 1, 50
                 elif diff == "Difficult":
-                    b = random.randint(2, 15)
-                    a = b * random.randint(10, 20)
+                    b = random.randint(13, 23)
+                    a = b * random.randint(15, 25)
                     lower, upper = 1, 100
                 question_text = f"What is {a} ÷ {b}?"
                 answer = a // b

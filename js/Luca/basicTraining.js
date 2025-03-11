@@ -120,6 +120,9 @@ function endTrainingSession() {
         playerStats.stats[category].total += categoryStats[category].total;
     });
     sessionStorage.setItem("overallTraining", JSON.stringify(playerStats));
+    sessionStorage.removeItem("tailoredTrainingQueue");  // ✅ Ensure old queue is removed
+
+    
 
     adjustUserLevels(); // ✅ Adjust user levels based on performance  
 }
@@ -221,18 +224,30 @@ function adjustUserLevels() {
         let avgTime = total > 0 ? (trainingStats[category].timeTaken / total) : 999; // Default high time if no data
 
         // Increase difficulty if the user got all 5 questions correct and the average time is 5 seconds or less
-        if (correct === 5 && avgTime <= 4) {
+        if (correct === 5 && avgTime <= 2.5) {
             if (playerStats.stats[category].level === "Easy") {
                 playerStats.stats[category].level = "Medium";
+                playerStats.stats[category].correct = 0;
+                playerStats.stats[category].total = 0;
+                playerStats.stats[category].time = 0;
             } else if (playerStats.stats[category].level === "Medium") {
+                playerStats.stats[category].correct = 0;
+                playerStats.stats[category].total = 0;
+                playerStats.stats[category].time = 0;
                 playerStats.stats[category].level = "Difficult";
             }
         }
         // Decrease difficulty if the user got 2 or fewer correct answers
-        else if (correct <= 2) {
+        else if (correct <= 1) {
             if (playerStats.stats[category].level === "Difficult") {
+                playerStats.stats[category].correct = 0;
+                playerStats.stats[category].total = 0;
+                playerStats.stats[category].time = 0;
                 playerStats.stats[category].level = "Medium";
             } else if (playerStats.stats[category].level === "Medium") {
+                playerStats.stats[category].correct = 0;
+                playerStats.stats[category].total = 0;
+                playerStats.stats[category].time = 0;
                 playerStats.stats[category].level = "Easy";
             }
         }
