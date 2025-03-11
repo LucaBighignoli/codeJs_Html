@@ -26,7 +26,7 @@ function initializePlayerStats() {
 
 // ✅ Navigation functions
 function goToPlay() {
-    window.location.href = "quiz.html";
+    window.location.href = "randomPlay.html";
 }
 
 function goToTraining() {

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathMind - Random Play</title>
+    <link rel="stylesheet" href="css/octas.css">
+    <!-- Link to new split JS files -->
+    <script src="js/Octa/questions.js" defer></script>
+    <script src="js/Octa/timer.js" defer></script>
+    <script src="js/Octa/ui.js" defer></script>
+    <script src="js/Octa/main.js" defer></script>
+</head>
+<body>
+<header>
+    <button onclick="goBack()">⬅ Back</button>
+    <h1>MathMind - Random Play</h1>
+    <h2 id="timer">Time Left: 1:30</h2>
+</header>
+
+<div id="status-bar">
+    <p id="lives">Lives: 3</p>
+    <p id="score">Score: 0</p>
+    <p id="level">Level: 1</p>
+</div>
+
+<div id="ready-container">
+    <button onclick="startQuiz()">Ready?</button>
+</div>
+
+<div id="quiz-container" style="display: none;">
+    <h2 id="question">Loading question...</h2>
+    <input type="text" id="answer-input" placeholder="Type your answer here" />
+    <button onclick="submitAnswer()">Submit</button>
+    <p id="feedback"></p>
+</div>
+
+<div id="final-score" style="display: none;">
+    <h2>Game Over!</h2>
+    <p id="score-display"></p>
+    <button onclick="restartQuiz()">Restart</button>
+</div>
+</body>
+</html>
