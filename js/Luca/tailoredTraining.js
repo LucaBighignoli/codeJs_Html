@@ -226,6 +226,8 @@ async function getNextTrainingQuestions(nextTraining) {
         let playerStats = JSON.parse(sessionStorage.getItem("overallTraining")) || {};
         let category = nextTraining.category;
         let currentLevel = playerStats.stats[category]?.level || "Easy";
+        let toggleState = localStorage.getItem("toggleState") === "on"; // Retrieve toggle state
+        
 
         let questionLevel;
 
@@ -237,7 +239,10 @@ async function getNextTrainingQuestions(nextTraining) {
             }
         } else questionLevel = currentLevel; // Accuracy and Balanced Training
 
-        let filteredQuestions = allQuestions.filter(q => q.category === category && q.difficulty === questionLevel);
+        let filteredQuestions;
+        if (toggleState) {
+             filteredQuestions = allQuestions.filter(q => q.category === category );
+        } else  filteredQuestions = allQuestions.filter(q => q.category === category && q.difficulty === questionLevel);
         let selectedQuestions = getRandomQuestions(filteredQuestions, 10); // Select 10 questions
 
         console.log(`Next Training: ${nextTraining.trainingType} (${category} at ${questionLevel})`);

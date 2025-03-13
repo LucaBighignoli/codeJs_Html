@@ -162,11 +162,16 @@ async function getTrainingQuestions() {
 
         // List of categories
         let categories = ["Addition", "Subtraction", "Multiplication", "Division"];
+        
+        // Retrieve toggle state from localStorage
+        let toggleState = localStorage.getItem("toggleState") === "on";
+        console.log("Toggle State:", toggleState);
 
-        // ✅ Select 5 questions per category at the user's difficulty level
+        // ✅ Select 5 questions per category based on toggle state
         categories.forEach(category => {
-            let userLevel = playerStats.stats[category].level;
-            let filteredQuestions = allQuestions.filter(q => q.category === category && q.difficulty === userLevel);
+            let filteredQuestions = toggleState 
+                ? allQuestions.filter(q => q.category === category) // Ignore difficulty level
+                : allQuestions.filter(q => q.category === category && q.difficulty === playerStats.stats[category].level); // Based on user level
             
             // Pick 5 random questions for this category
             let pickedQuestions = getRandomQuestions(filteredQuestions, 5);
@@ -187,8 +192,6 @@ function getRandomQuestions(questionArray, num) {
     return shuffled.slice(0, num);
 }
 
-// ✅ Call this function when starting training
-getTrainingQuestions();
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {

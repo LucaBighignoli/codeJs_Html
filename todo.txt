@@ -1,5 +1,5 @@
-- change method of question seleections so that there are no duplicates in trainings
 - make question font bigger (maybe in bold)
 - change gui
 - color gui changes based on level of player
+- add difficulty level: professor
  

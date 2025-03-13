@@ -22,3 +22,22 @@ function displayPlayerLevels() {
 
     document.getElementById("player-levels").innerHTML = levelsText;
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const toggleBtn = document.getElementById("toggle-btn");
+
+    // Load saved state from localStorage
+    if (localStorage.getItem("toggleState") === "on") {
+        toggleBtn.checked = true;
+    }
+
+    toggleBtn.addEventListener("change", () => {
+        if (toggleBtn.checked) {
+            console.log("Feature Enabled");
+            localStorage.setItem("toggleState", "on");
+        } else {
+            console.log("Feature Disabled");
+            localStorage.setItem("toggleState", "off");
+        }
+    });
+});
