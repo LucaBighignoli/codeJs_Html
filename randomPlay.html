@@ -13,20 +13,35 @@
 </head>
 <body>
 <header>
-    <button onclick="goBack()">⬅ Back</button>
-    <h1>MathMind - Random Play</h1>
+    <button onclick="goBack()">⬅ Go Back</button>
+        <h1>MathMind - Random Play</h1>
     <h2 id="timer">Time Left: 1:30</h2>
 </header>
 
 <div id="status-bar">
-    <p id="lives">Lives: 3</p>
+    <p id="lives">❤️❤️❤️</p> <!-- ✅ Starts with 3 hearts -->
     <p id="score">Score: 0</p>
     <p id="level">Level: 1</p>
 </div>
 
+
 <div id="ready-container">
-    <button onclick="startQuiz()">Ready?</button>
+    <button id="start-button" onclick="startQuiz()">Loading...</button>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const startButton = document.getElementById("start-button");
+        const improveMode = sessionStorage.getItem("improveMode") === "true";
+
+        if (improveMode) {
+            startButton.innerText = "Improve This Level";
+        } else {
+            startButton.innerText = "Resume Last Level";
+        }
+    });
+</script>
+
 
 <div id="quiz-container" style="display: none;">
     <h2 id="question">Loading question...</h2>

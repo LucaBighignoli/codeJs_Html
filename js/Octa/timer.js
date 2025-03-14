@@ -4,8 +4,19 @@ let timeLeft = 90;
 let timerInterval;
 
 function startBufferTime() {
-    const bufferDuration = 4;
+    const bufferDuration = 1;
     let bufferTimeLeft = bufferDuration;
+
+    // ✅ Ensure elements exist before disabling them
+    const answerInput = document.getElementById("answer-input");
+    const submitButton = document.getElementById("submit-button");
+
+    if (answerInput && submitButton) {
+        answerInput.disabled = true;
+        submitButton.disabled = true;
+    } else {
+        console.error("❌ Error: Input field or submit button not found.");
+    }
 
     const bufferInterval = setInterval(() => {
         if (bufferTimeLeft > 0) {
@@ -14,7 +25,12 @@ function startBufferTime() {
         } else {
             clearInterval(bufferInterval);
             document.getElementById("timer").innerText = "Go!";
+
             setTimeout(() => {
+                if (answerInput && submitButton) {
+                    answerInput.disabled = false;
+                    submitButton.disabled = false;
+                }
                 if (timerEnabled) startTimer();
             }, 1000);
         }

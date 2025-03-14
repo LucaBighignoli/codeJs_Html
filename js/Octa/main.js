@@ -37,33 +37,51 @@ function getLevelName() {
 function startQuiz() {
     console.log("Starting quiz...");
 
-    // ✅ Ensure Improve Mode is turned off for normal play
-    localStorage.setItem("improveMode", "false");
-    localStorage.removeItem("currentLevel");
+    let improveMode = sessionStorage.getItem("improveMode") === "true";
+
+    if (improveMode) {
+        console.log("🚀 Improve Mode ACTIVE: Playing improvement for", sessionStorage.getItem("currentLevel"));
+    } else {
+        // ✅ Load last saved level or default to Iron
+        let savedLevel = localStorage.getItem("currentLevel");
+        if (savedLevel && levelNames.includes(savedLevel)) {
+            level = levelNames.indexOf(savedLevel) + 1;
+        } else {
+            level = 1; // Default to Iron
+        }
+        console.log("🎮 Normal Play Mode: Resuming from level:", getLevelName());
+    }
+
+    // ✅ Load saved score & time
+    score = parseInt(localStorage.getItem("currentScore")) || 0;
+    timeLeft = parseInt(localStorage.getItem("currentTimeLeft")) || 90;
+
+    localStorage.setItem("currentLevel", getLevelName()); // ✅ Save level persistently
 
     generateNewQuestions();
     document.getElementById("ready-container").style.display = "none";
     document.getElementById("quiz-container").style.display = "block";
     inQuiz = true;
-    resetGame();
+    updateUI();
     startBufferTime();
     setTimeout(() => loadRandomQuiz(getLevelName()), 2000);
 }
-
 // Check the answer
 function submitAnswer() {
-    const answerInput = document.getElementById("answer-input").value.trim();
-    if (answerInput === "") return;
+    const answerInput = document.getElementById("answer-input");
+    const userAnswer = parseInt(answerInput.value.trim());
 
-    const userAnswer = parseInt(answerInput);
+    if (answerInput.value.trim() === "") return;
+
     if (isNaN(userAnswer)) {
         displayFeedback("Please enter a valid number.", "orange");
-        return;
-    }
-
-    if (userAnswer === currentCorrectAnswer) {
+    } else if (userAnswer === currentCorrectAnswer) {
         score++;
         displayFeedback("✅ Correct!", "green");
+
+        // ✅ Save score in localStorage
+        localStorage.setItem("currentScore", score);
+
         if (score % 5 === 0 && !improveMode) {
             showCongratulations();
             return;
@@ -76,11 +94,12 @@ function submitAnswer() {
             return;
         }
     }
+
+    answerInput.value = ""; // ✅ Clear input field
     updateUI();
     setTimeout(() => loadRandomQuiz(getLevelName()), 1000);
 }
 
-// Show Congratulations and options
 // Show Congratulations and options
 function showCongratulations() {
     console.log("Level Up!");
@@ -100,29 +119,32 @@ function showCongratulations() {
 
 
 // Improve level (replay current level)
-// Improve level (replay a past level)
 function nextLevel() {
     console.log(`Current level: ${level} -> Moving to next level...`);
 
-    sessionStorage.setItem("improveMode", "false");  // ✅ Disable Improve Mode
+    sessionStorage.setItem("improveMode", "false");
     sessionStorage.removeItem("currentLevel");
 
     if (level < levelNames.length) {
-        level++;  // ✅ Increase level
+        level++;
+        localStorage.setItem("currentLevel", getLevelName());  // ✅ Save last reached level
 
-        // ✅ Use `localStorage` to permanently save reached levels
+        lives = 3;
+        timeLeft = 90;
+
         let reachedLevels = JSON.parse(localStorage.getItem("reachedLevels")) || ["Iron"];
         if (!reachedLevels.includes(getLevelName())) {
             reachedLevels.push(getLevelName());
-            localStorage.setItem("reachedLevels", JSON.stringify(reachedLevels));  // ✅ Store reached levels
+            localStorage.setItem("reachedLevels", JSON.stringify(reachedLevels));
         }
     } else {
         console.log("You've reached the max level!");
         return;
     }
 
-    timerEnabled = false;
+    timerEnabled = true;
     clearInterval(timerInterval);
+    startTimer();
 
     document.getElementById("final-score").style.display = "none";
     document.getElementById("quiz-container").style.display = "block";
@@ -130,32 +152,65 @@ function nextLevel() {
     updateUI();
     loadRandomQuiz(getLevelName());
 }
-
-
-
-
-// Restart the quiz
-function restartQuiz() {
-    resetGame();
-    document.getElementById("final-score").style.display = "none";
-    document.getElementById("ready-container").style.display = "block";
-}
-
-// Improve level (replay last completed level)
 function improveLevel() {
-    console.log("Improving last completed level...");
+    console.log("Improving last completed level..."); // ✅ Fix: Use console.log
 
-    const currentLevelName = getLevelName();  // ✅ Get the correct level name
+    const currentLevelName = getLevelName();
     if (!currentLevelName) {
-        console.error("Error: Unable to determine last completed level!");
+        console.error("❌ Error: Unable to determine last completed level!");
         return;
     }
 
     console.log(`Storing currentLevel: ${currentLevelName}`);
 
-    sessionStorage.setItem("improveMode", "true");  // ✅ Store Improve Mode in sessionStorage
-    sessionStorage.setItem("currentLevel", currentLevelName);  // ✅ Store last completed level
+    // ✅ Store Improve Mode settings
+    sessionStorage.setItem("improveMode", "true");
+    sessionStorage.setItem("currentLevel", currentLevelName);
 
+    console.log("🚀 Improve Mode is now set to:", sessionStorage.getItem("improveMode"));
     window.location.href = "improvePlay.html";  // ✅ Redirect to Improve Play
 }
+
+function goBack() {
+    console.log("⬅️ Go Back button pressed...");
+
+    // ✅ If the quiz is active, restart it instead of leaving
+    if (document.getElementById("quiz-container").style.display === "block") {
+        restartQuiz();  // ✅ Calls restartQuiz() to avoid repeated code
+    } else {
+        console.log("🏠 Returning to main menu...");
+        window.location.href = "Home.html";  // ✅ Default behavior for menus
+    }
+}
+function restartQuiz() {
+    console.log("🔄 Restarting quiz without resetting progress...");
+
+    clearInterval(timerInterval); // ✅ Stop the timer immediately
+    inQuiz = false;  // ✅ Mark the game as not active
+
+    // ✅ Keep the current level & score unchanged
+    document.getElementById("quiz-container").style.display = "none";
+    document.getElementById("ready-container").style.display = "block";
+    document.getElementById("score").innerText = `Score: ${score}`; // ✅ Preserve score display
+
+    console.log(`➡️ Ready to start again from level: ${getLevelName()}, Score: ${score}`);
+}
+document.addEventListener("DOMContentLoaded", function() {
+    let savedLevel = localStorage.getItem("currentLevel");
+    if (savedLevel && levelNames.includes(savedLevel)) {
+        level = levelNames.indexOf(savedLevel) + 1;
+    } else {
+        level = 1; // Default to Iron
+    }
+
+    score = parseInt(localStorage.getItem("currentScore")) || 0;
+    timeLeft = parseInt(localStorage.getItem("currentTimeLeft")) || 90;
+
+    console.log(`🔄 Loaded saved progress: Level ${getLevelName()}, Score: ${score}, Time Left: ${timeLeft} sec`);
+    updateUI();
+});
+
+
+
+
 
