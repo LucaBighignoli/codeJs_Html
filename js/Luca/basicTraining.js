@@ -145,7 +145,7 @@ function retryIncorrectQuestions() {
 async function getTrainingQuestions() {
     try {
         // Load questions from JSON file
-        let response = await fetch("../data/questions.json");
+        let response = await fetch("data/questions.json");
         let allQuestions = await response.json();
 
         // Get player's current levels

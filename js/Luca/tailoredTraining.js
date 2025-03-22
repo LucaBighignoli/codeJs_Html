@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", getTrainingMode());
 
 async function getTailoredTrainingQuestions() {
     try {
-        let response = await fetch("../data/questions.json");
+        let response = await fetch("data/questions.json");
         let allQuestions = await response.json();
         let trainingMode = getTrainingMode();
 
@@ -262,7 +262,7 @@ async function getNextTrainingQuestions(nextTraining) {
             return [];
         }
 
-        let response = await fetch("../data/questions.json");
+        let response = await fetch("data/questions.json");
         let allQuestions = await response.json();
 
         let playerStats = JSON.parse(sessionStorage.getItem("overallTraining")) || {};
