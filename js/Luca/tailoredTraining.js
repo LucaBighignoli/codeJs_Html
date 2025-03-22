@@ -35,6 +35,19 @@ let questions=[];
 let correctQuestions=0;
 
 async function getTrainingMode() {
+
+    if (!sessionStorage.getItem("objectiveData")) {
+        sessionStorage.setItem("objectiveData", JSON.stringify({
+            skippedCategories: 0,
+            exitCount: 0,
+            trainingCompleted: 0,
+            correctAnswers: 0,
+            totalQuestions: 0
+        }));
+    }
+    let currentIndex=0;
+    
+
     let trainingQueue = JSON.parse(sessionStorage.getItem("tailoredTrainingQueue")) || [];
 
 
@@ -45,16 +58,13 @@ async function getTrainingMode() {
         trainingQueue = JSON.parse(sessionStorage.getItem("tailoredTrainingQueue")) || [];
     }
 
-    let nextTraining = trainingQueue.shift();
-    sessionStorage.setItem("tailoredTrainingQueue", JSON.stringify(trainingQueue));
+    let nextTraining = trainingQueue.length > 0 ? trainingQueue[0] : null;
     questions = await getNextTrainingQuestions(nextTraining);
 
     displayQuestion(questions[currentIndex]);
     showTrainingGoal(nextTraining); 
 
 
-
-    
 
     console.log(`Next Tailored Training: ${nextTraining.category} (${nextTraining.trainingType})`);
     return nextTraining;
@@ -192,7 +202,7 @@ function findTrainingPrioritiesV2() {
     );
     
     categorizedTraining.balanced.sort((a, b) => 
-        a.difficultyValue - b.difficultyValue
+        a.difficultyValue - b.difficultyValue || (a.accuracy - b.accuracy) || (a.avgTime - b.avgTime)
     );
 
     // Prioritize accuracy > speed (unless speed is extremely slow)
@@ -211,6 +221,38 @@ function findTrainingPrioritiesV2() {
     console.log("Generated Training Queue (V2):", trainingQueue);
 
 }
+
+let sessionStartTime;
+
+// Function to start the timer when user enters the page
+function startTrainingSessionTimer() {
+    sessionStartTime = Date.now(); // Store the start time
+}
+
+// Function to save session duration when user leaves
+function saveTrainingSessionDuration() {
+    if (!sessionStartTime) return; // If no start time, do nothing
+
+    let sessionEndTime = Date.now(); // Capture end time
+    let timeSpent = Math.floor((sessionEndTime - sessionStartTime) / 1000); // Convert to seconds
+
+    // Retrieve existing session durations from sessionStorage
+    let sessionDurations = JSON.parse(sessionStorage.getItem("trainingSessionDurations")) || [];
+
+    // Add new session time
+    sessionDurations.push(timeSpent);
+
+    // Save updated session durations
+    sessionStorage.setItem("trainingSessionDurations", JSON.stringify(sessionDurations));
+
+    console.log("Updated Training Session Durations:", sessionDurations);
+}
+
+// Start timer when page loads
+document.addEventListener("DOMContentLoaded", startTrainingSessionTimer);
+
+// Save session duration when user leaves the page or refreshes
+window.addEventListener("beforeunload", saveTrainingSessionDuration);
 
 
 async function getNextTrainingQuestions(nextTraining) {
@@ -241,7 +283,7 @@ async function getNextTrainingQuestions(nextTraining) {
 
         let filteredQuestions;
         if (toggleState) {
-             filteredQuestions = allQuestions.filter(q => q.category === category );
+             filteredQuestions = allQuestions;
         } else  filteredQuestions = allQuestions.filter(q => q.category === category && q.difficulty === questionLevel);
         let selectedQuestions = getRandomQuestions(filteredQuestions, 10); // Select 10 questions
 
@@ -276,12 +318,17 @@ function showTrainingGoal(trainingMode) {
         goalText = "Balanced Training: Improve both speed and accuracy!";
     }
     
+    // Include the category name above the training description
     document.getElementById("training-goal").innerText = goalText;
+    // ✅ Keep the description in the existing box
+    document.getElementById("training-category").innerText = trainingMode.category;
 }
-
+let timer;
+let timeLeft;
 
 function displayQuestion(question) {
-    // Display the question text along with its difficulty level
+    clearInterval(timer); // ✅ Ensure no old timers are running
+
     document.getElementById("question-text").innerText = `${question.question} `;
     
     let optionsDiv = document.getElementById("options");
@@ -294,19 +341,32 @@ function displayQuestion(question) {
         button.onclick = () => checkAnswer(question, option, button);
         optionsDiv.appendChild(button);
     });
-    
-    // Record the start time for this question
-    questionStartTime = Date.now();
+
+    questionStartTime = Date.now(); // ✅ Record the start time for timing analysis
+
+    let currentTraining = JSON.parse(sessionStorage.getItem("tailoredTrainingQueue"))[0];
+    if (currentTraining.trainingType === "Speed Training") {
+        startQuestionTimer(6); // ✅ Start a 6-second timer for Speed Training
+    } else if (currentTraining.trainingType === "Balanced Training") {
+        startQuestionTimer(10); // ✅ Start a 10-second timer for Balanced Training
+    }
 }
 
 function checkAnswer(question, selectedOption, buttonElement) {
+    clearInterval(timer); // ✅ Stop the timer when an answer is selected   
     let isCorrect = selectedOption === question.answer;
+    let stats = JSON.parse(sessionStorage.getItem("objectiveData"));
+
 
     // ✅ Apply correct/wrong styles
-    buttonElement.classList.add(isCorrect ? "correct-answer" : "wrong-answer");
+    if (buttonElement!=null )buttonElement.classList.add(isCorrect ? "correct-answer" : "wrong-answer");
     if (isCorrect) {
-            correctQuestions++;
+        stats.correctAnswers++; // Increment correct answers count
     }
+
+    stats.totalQuestions++; // Increment total questions count
+    sessionStorage.setItem("objectiveData", JSON.stringify(stats));
+
 
     setTimeout(() => {
         currentIndex++;
@@ -319,12 +379,89 @@ function checkAnswer(question, selectedOption, buttonElement) {
     }, 1000);
 }
 
+function startQuestionTimer(duration) {
+    clearInterval(timer); // ✅ Stop any existing timer before starting a new one
+    timeLeft = duration;
+    document.getElementById("timer-display").innerText = `Time Left: ${timeLeft}s`;
+
+    timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer-display").innerText = `Time Left: ${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+            clearInterval(timer); // ✅ Stop the timer when reaching 0
+            handleTimeout(); // ✅ Ensure timeout is handled properly
+        }
+    }, 1000);
+}
+
+function handleTimeout() {
+    let currentQuestion = questions[currentIndex];
+
+    // ✅ Auto-submit incorrect answer if time runs out
+    checkAnswer(currentQuestion, null, null); // ✅ Pass null values to simulate no answer
+}
+
 function endTrainingSession() {
+    clearInterval(timer); // ✅ Stop the timer
+
+    // ✅ Hide the timer display
+    document.getElementById("timer-display").style.display = "none";
+
+    let trainingQueue = JSON.parse(sessionStorage.getItem("tailoredTrainingQueue")) || [];
+    trainingQueue.shift();
+    sessionStorage.setItem("tailoredTrainingQueue", JSON.stringify(trainingQueue));
+
+    let stats = JSON.parse(sessionStorage.getItem("objectiveData"));
+    stats.trainingCompleted++; // Increment completed training count
+    sessionStorage.setItem("objectiveData", JSON.stringify(stats));
+
     document.getElementById("question-text").innerText = "Training Complete!";
     document.getElementById("options").innerHTML = "";  // Clear options
 
+    document.getElementById("exit-training").style.display = "none";
+    document.getElementById("skip-category").style.display = "none";
+
+
     document.getElementById("finish-training").style.display = "block"; // ✅ Show Finish button
-    if (incorrectQuestions.length > 0) {
-        document.getElementById("retry-incorrect").style.display = "block"; // ✅ Show Retry button
-    }
+    document.getElementById("next-category").style.display = "block"; // ✅ Show Next Category button
+
+    
 }
+
+function exitButton() {
+    let stats = JSON.parse(sessionStorage.getItem("objectiveData"));
+    stats.exitCount++; // Increment exit count
+    sessionStorage.setItem("objectiveData", JSON.stringify(stats));
+
+    window.location.href = "trainingHome.html"; // Change to the actual exit page
+};
+
+
+function skipCategory() {
+    let trainingQueue = JSON.parse(sessionStorage.getItem("tailoredTrainingQueue")) || [];
+    trainingQueue.shift(); // Remove current category from queue
+    sessionStorage.setItem("tailoredTrainingQueue", JSON.stringify(trainingQueue));
+
+    let stats = JSON.parse(sessionStorage.getItem("objectiveData"));
+    stats.skippedCategories++; // Increment skip count
+    sessionStorage.setItem("objectiveData", JSON.stringify(stats));
+
+
+    currentIndex = 0; // ✅ Reset question index before loading new category
+
+    getTrainingMode(); // Load next training
+}
+
+function nextCategory() {
+    document.getElementById("timer-display").style.display = "block"; // ✅ Show timer display
+
+    currentIndex=0;
+    document.getElementById("finish-training").style.display = "none"; // ✅ Show Finish button
+    document.getElementById("next-category").style.display = "none"; // ✅ Show Next Category button
+    
+    getTrainingMode();
+    document.getElementById("exit-training").style.display = "block";
+    document.getElementById("skip-category").style.display = "block";
+}
+

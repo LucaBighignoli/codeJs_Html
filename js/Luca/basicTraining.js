@@ -87,6 +87,7 @@ function endTrainingSession() {
     document.getElementById("options").innerHTML = "";  // Clear options
 
     document.getElementById("finish-training").style.display = "block"; // ✅ Show Finish button
+    document.getElementById("see-stats").style.display = "block"; // Show See the results button
     if (incorrectQuestions.length > 0) {
         document.getElementById("retry-incorrect").style.display = "block"; // ✅ Show Retry button
     }
@@ -259,4 +260,8 @@ function adjustUserLevels() {
     // Save the updated playerStats back to sessionStorage
     sessionStorage.setItem("overallTraining", JSON.stringify(playerStats));
     console.log("Updated Player Stats:", playerStats);
+}
+
+function seeStats() {
+    window.location.href = "stats.html";
 }

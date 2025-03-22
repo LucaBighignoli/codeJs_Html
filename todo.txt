@@ -1,3 +1,3 @@
-- color gui changes based on level of player
-- add difficulty level: professor
- 
+- update number of game played
+- store somehow for how long the user stays in tailored training every time
+- put button to skip tailored training and to "abort"

@@ -5,13 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tailored Training</title>
     <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        #training-category {
+            font-size: 1.8em; /* Slightly smaller */
+        }
+    </style>
 
     <script src="js/Luca/tailoredTraining.js"></script> 
 </head>
 <body>
-    <h1>Tailored Training</h1>
+    <p id="timer-display" style="font-size: 30px; font-weight: bold;"></p>
+    <!-- Category heading -->
+    <h1 id="training-category">Category will be displayed here</h1>
 
-    <!-- Display the training goal -->
+    <!-- Training goal description box -->
     <div id="training-description-box" style="border: 2px solid #333; padding: 15px; border-radius: 10px; background-color: #f9f9f9; text-align: center; max-width: 60%; margin: 10px auto;">
         <p id="training-goal">Training goal will be displayed here.</p>
     </div>
@@ -27,12 +35,18 @@
         </div>
     </div>
     <!-- Options container -->
+    <div id="training-controls">
+        <button id="exit-training" class="control-btn" onclick= "exitButton()">Exit Training</button>
+        <button id="skip-category" class="control-btn" onclick="skipCategory()">Skip Category</button>
+    </div>
     
 
     <!-- Result display -->
     <p id="result"></p>
 
     <button id="finish-training" onclick="window.location.href='trainingHome.html'" style="display:none;">Finish Training</button>
+    <br>
+    <button id="next-category"  onclick="nextCategory()" style="display:none;">Next Category</button>
 
     
 </body>

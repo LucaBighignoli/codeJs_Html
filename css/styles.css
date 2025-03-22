@@ -194,3 +194,36 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(24px);
 }
+
+
+
+#training-controls {
+    display: flex;
+    justify-content: space-between; /* Align buttons side by side */
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+}
+
+.control-btn {
+    flex: 1; /* Make buttons equal width */
+    padding: 12px;
+    margin: 0 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#exit-training {
+    background-color: #ff4d4d; /* Red for exit */
+    color: white;
+}
+
+#skip-category {
+    background-color: #435b44; /* Green for skipping */
+    color: white;
+}
