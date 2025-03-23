@@ -272,7 +272,7 @@ function restartQuiz() {
 
     console.log(`➡️ Ready to start again from level: ${getLevelName()}, Score: ${score}`);
 }
-
+l
 document.addEventListener("DOMContentLoaded", function() {
     console.log("🔄 Retrieving saved game progress...");
 
