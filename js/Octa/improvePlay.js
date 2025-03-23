@@ -32,29 +32,43 @@ function goBack() {
 // Display level buttons based on reached levels
 function displayLevelButtons() {
     const levelButtons = document.getElementById("level-buttons");
-    const bestTimes = JSON.parse(localStorage.getItem("bestTimes")) || {};
-    const reachedLevels = JSON.parse(localStorage.getItem("reachedLevels")) || ["Iron"];  // ✅ Default to Iron
+    const bestTimes = JSON.parse(localStorage.getItem("bestTimes")) || [];
+    const reachedLevels = JSON.parse(localStorage.getItem("reachedLevels")) || ["Iron"];
 
-    console.log("Loaded reachedLevels:", reachedLevels); // ✅ Debugging check
+    console.log("Loaded reachedLevels:", reachedLevels);
 
-    levelButtons.innerHTML = ""; // ✅ Clear previous buttons before adding new ones
+    levelButtons.innerHTML = "<h2>Choose a Level to Improve:</h2>";
 
-    levelNames.forEach((level) => {
-        if (reachedLevels.includes(level)) {  // ✅ Show only reached levels
-            const bestTime = bestTimes[level] !== undefined ? bestTimes[level] + " seconds" : "--:--";
+    levelNames.forEach((level, index) => {
+        // ✅ Only show levels that are in reachedLevels AND have a valid best time
+        const hasBeenCompleted = reachedLevels.includes(level);
+        const hasBestTime = bestTimes[index] !== undefined && !isNaN(bestTimes[index]);
+
+        if (hasBeenCompleted && hasBestTime) {
+            const bestTime = bestTimes[index] + " seconds";
+
             const button = document.createElement("button");
             button.innerText = `${level} (Best Time: ${bestTime})`;
             button.onclick = function () {
-                sessionStorage.setItem("currentLevel", level);  // ✅ Store level in `sessionStorage`
-                startLevel(level);  // ✅ Ensure button click passes the level correctly
+                sessionStorage.setItem("currentLevel", level);
+                startLevel(level);
             };
+
             levelButtons.appendChild(button);
         }
     });
+
+    // ✅ If no buttons were added, show a message
+    if (levelButtons.children.length <= 1) {
+        const msg = document.createElement("p");
+        msg.innerText = "No levels available to improve yet. Play levels first!";
+        levelButtons.appendChild(msg);
+    }
 }
 
 // Run on page load
 document.addEventListener("DOMContentLoaded", displayLevelButtons);
+
 
 
 

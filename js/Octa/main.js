@@ -1,7 +1,7 @@
 // main.js - Main Game Logic
 
 const levelNames = ["Iron", "Bronze", "Silver", "Gold", "Diamond"];
-
+let improveScore = 0;
 let score = 0;
 let lives = 3;
 let level = 1;
@@ -40,28 +40,34 @@ function startQuiz() {
     let improveMode = sessionStorage.getItem("improveMode") === "true";
 
     if (improveMode) {
-        console.log("🚀 Improve Mode ACTIVE: Playing improvement for", sessionStorage.getItem("currentLevel"));
+        const currentLevelName = sessionStorage.getItem("currentLevel");
+        level = levelNames.indexOf(currentLevelName) + 1 || 1;
+
+        const bestTimes = JSON.parse(localStorage.getItem("bestTimes")) || [];
+        const bestTime = bestTimes[level - 1];
+
+        timeLeft = bestTime || 90;
+
+        improveScore = 0; // ✅ Separate score for improve mode
+        console.log(`🚀 Improve Mode ACTIVE: ${currentLevelName}, Time = ${timeLeft}s`);
     } else {
-        // ✅ Load last saved level or default to Iron
         let savedLevel = localStorage.getItem("currentLevel");
-        if (savedLevel && levelNames.includes(savedLevel)) {
-            level = levelNames.indexOf(savedLevel) + 1;
-        } else {
-            level = 1; // Default to Iron
-        }
-        console.log("🎮 Normal Play Mode: Resuming from level:", getLevelName());
+        level = savedLevel && levelNames.includes(savedLevel)
+            ? levelNames.indexOf(savedLevel) + 1
+            : 1;
+
+        timeLeft = parseInt(localStorage.getItem("currentTimeLeft")) || 90;
+        score = parseInt(localStorage.getItem("currentScore")) || 0;
+        console.log("🎮 Normal Play Mode: Level =", getLevelName(), ", Score =", score);
     }
 
-    // ✅ Load saved score & time
-    score = parseInt(localStorage.getItem("currentScore")) || 0;
-    timeLeft = parseInt(localStorage.getItem("currentTimeLeft")) || 90;
-
-    localStorage.setItem("currentLevel", getLevelName()); // ✅ Save level persistently
+    localStorage.setItem("currentLevel", getLevelName());
 
     generateNewQuestions();
     document.getElementById("ready-container").style.display = "none";
     document.getElementById("quiz-container").style.display = "block";
     inQuiz = true;
+
     updateUI();
     startBufferTime();
     setTimeout(() => loadRandomQuiz(getLevelName()), 2000);
@@ -73,19 +79,57 @@ function submitAnswer() {
 
     if (answerInput.value.trim() === "") return;
 
+    const improveMode = sessionStorage.getItem("improveMode") === "true";
+
     if (isNaN(userAnswer)) {
         displayFeedback("Please enter a valid number.", "orange");
     } else if (userAnswer === currentCorrectAnswer) {
-        score++;
+        if (improveMode) {
+            improveScore++;
+            console.log("✅ Correct! (Improve Mode) Score:", improveScore);
+            if (improveScore >= 15) {
+                // ✅ You completed the level
+                clearInterval(timerInterval);
+
+                const levelIndex = level - 1;
+                const bestTimes = JSON.parse(localStorage.getItem("bestTimes")) || [];
+                const timeTaken = (bestTimes[levelIndex] || 90) - timeLeft;
+
+                console.log(`🎯 Improve Mode completed! Time taken: ${timeTaken}s`);
+
+                // ✅ Update best time only if this one is faster
+                if (!bestTimes[levelIndex] || timeTaken < bestTimes[levelIndex]) {
+                    bestTimes[levelIndex] = timeTaken;
+                    localStorage.setItem("bestTimes", JSON.stringify(bestTimes));
+                    alert(`🎉 New best time for ${getLevelName()}: ${timeTaken}s`);
+                } else {
+                    alert(`✅ Completed! Your time: ${timeTaken}s\nBest time remains: ${bestTimes[levelIndex]}s`);
+                }
+
+                // ✅ Go back to Improve Mode menu
+                window.location.href = "improvePlay.html";
+                return;
+            }
+
+        } else {
+            score++;
+            localStorage.setItem("currentScore", score);
+            console.log("✅ Correct! (Normal Mode) Score:", score);
+        }
+
         displayFeedback("✅ Correct!", "green");
 
-        // ✅ Save score in localStorage
-        localStorage.setItem("currentScore", score);
-
-        if (score % 5 === 0 && !improveMode) {
+        if (score%15===0&& !improveMode) {
             showCongratulations();
+
+            // ✅ Automatically advance to next level after short delay
+            setTimeout(() => {
+                nextLevel();
+            }, 3000); // Optional delay to let the user see the congrats message
+
             return;
         }
+
     } else {
         lives--;
         displayFeedback(`❌ Incorrect. The correct answer was ${currentCorrectAnswer}.`, "red");
@@ -95,7 +139,7 @@ function submitAnswer() {
         }
     }
 
-    answerInput.value = ""; // ✅ Clear input field
+    answerInput.value = "";
     updateUI();
     setTimeout(() => loadRandomQuiz(getLevelName()), 1000);
 }
@@ -106,15 +150,31 @@ function showCongratulations() {
     clearInterval(timerInterval);
     timerEnabled = false;
 
+    const currentLevelIndex = level - 1;
+    const timeTaken = 90 - timeLeft;
+
+    // Load current bestTimes or initialize
+    let bestTimes = JSON.parse(localStorage.getItem("bestTimes")) || [];
+
+    // Save best time if it's better (or not set)
+    if (!bestTimes[currentLevelIndex] || timeTaken < bestTimes[currentLevelIndex]) {
+        bestTimes[currentLevelIndex] = timeTaken;
+        localStorage.setItem("bestTimes", JSON.stringify(bestTimes));
+        console.log(`⏱️ New best time for ${getLevelName()}: ${timeTaken}s`);
+    } else {
+        console.log(`⏱️ Time for ${getLevelName()}: ${timeTaken}s (Best: ${bestTimes[currentLevelIndex]}s)`);
+    }
+
     const nextLevelName = getLevelName();
 
     document.getElementById("quiz-container").style.display = "none";
     document.getElementById("final-score").style.display = "block";
     document.getElementById("score-display").innerHTML = `
-        🎉 Congratulations! You reached ${nextLevelName} level!<br><br>
-        <button onclick="improveLevel()">Improve</button>
-        <button onclick="nextLevel()">Next Level</button>
-    `;
+    🎉 Congratulations! You reached ${nextLevelName} level!<br>
+    Automatically moving to the next level...
+    <br><br>
+    <button onclick="improveLevel()">Improve This Level</button>
+`;
 }
 
 
@@ -170,9 +230,17 @@ function improveLevel() {
     console.log("🚀 Improve Mode is now set to:", sessionStorage.getItem("improveMode"));
     window.location.href = "improvePlay.html";  // ✅ Redirect to Improve Play
 }
-
 function goBack() {
     console.log("⬅️ Go Back button pressed...");
+
+    clearInterval(timerInterval); // ✅ Stop the timer immediately
+
+    // ✅ Round down to nearest multiple of 15
+    if (score % 15 !== 0) {
+        score = Math.floor(score / 15) * 15;
+        localStorage.setItem("currentScore", score); // ✅ Save updated score
+        console.log(`🔁 Score rounded down to ${score}`);
+    }
 
     // ✅ If the quiz is active, restart it instead of leaving
     if (document.getElementById("quiz-container").style.display === "block") {
@@ -182,33 +250,134 @@ function goBack() {
         window.location.href = "Home.html";  // ✅ Default behavior for menus
     }
 }
+
 function restartQuiz() {
-    console.log("🔄 Restarting quiz without resetting progress...");
+    console.log("🔄 Restarting quiz...");
 
     clearInterval(timerInterval); // ✅ Stop the timer immediately
-    inQuiz = false;  // ✅ Mark the game as not active
+    inQuiz = false;
 
-    // ✅ Keep the current level & score unchanged
+    const isImproveMode = sessionStorage.getItem("improveMode") === "true";
+
+    if (isImproveMode) {
+        console.log("🚀 Improve Mode active — redirecting to improvePlay.html...");
+        window.location.href = "improvePlay.html"; // ✅ Redirect to level selector
+        return;
+    }
+
+    // Normal Mode restart logic
     document.getElementById("quiz-container").style.display = "none";
     document.getElementById("ready-container").style.display = "block";
-    document.getElementById("score").innerText = `Score: ${score}`; // ✅ Preserve score display
+    document.getElementById("score").innerText = `Score: ${score}`;
 
     console.log(`➡️ Ready to start again from level: ${getLevelName()}, Score: ${score}`);
 }
+
 document.addEventListener("DOMContentLoaded", function() {
-    let savedLevel = localStorage.getItem("currentLevel");
-    if (savedLevel && levelNames.includes(savedLevel)) {
-        level = levelNames.indexOf(savedLevel) + 1;
+    console.log("🔄 Retrieving saved game progress...");
+
+    let reachedLevels = JSON.parse(localStorage.getItem("reachedLevels")) || ["Iron"]; // Default to ["Iron"]
+
+    // Get the last level reached from the array
+    let lastReachedLevel = reachedLevels[reachedLevels.length - 1];
+
+    if (lastReachedLevel && levelNames.includes(lastReachedLevel)) {
+        level = levelNames.indexOf(lastReachedLevel) + 1;
+        localStorage.setItem("currentLevel", lastReachedLevel); // ✅ Sync current level with last reached level
     } else {
         level = 1; // Default to Iron
+        localStorage.setItem("currentLevel", "Iron"); // ✅ Ensure currentLevel is set correctly
     }
 
     score = parseInt(localStorage.getItem("currentScore")) || 0;
     timeLeft = parseInt(localStorage.getItem("currentTimeLeft")) || 90;
 
-    console.log(`🔄 Loaded saved progress: Level ${getLevelName()}, Score: ${score}, Time Left: ${timeLeft} sec`);
+    console.log(`✅ Game Loaded: Level ${getLevelName()}, Score: ${score}, Time Left: ${timeLeft} sec`);
+
+    // ✅ Immediately update UI to reflect the correct level
     updateUI();
 });
+document.addEventListener("DOMContentLoaded", function() {
+    console.log("🔄 Retrieving saved game progress...");
+
+    let reachedLevels = JSON.parse(localStorage.getItem("reachedLevels")) || ["Iron"];
+
+    // Get the last level reached from the array
+    let lastReachedLevel = reachedLevels[reachedLevels.length - 1];
+
+    if (lastReachedLevel && levelNames.includes(lastReachedLevel)) {
+        level = levelNames.indexOf(lastReachedLevel) + 1;
+        localStorage.setItem("currentLevel", lastReachedLevel); // ✅ Sync current level with last reached level
+    } else {
+        level = 1; // Default to Iron
+        localStorage.setItem("currentLevel", "Iron"); // ✅ Ensure currentLevel is set correctly
+    }
+
+    score = parseInt(localStorage.getItem("currentScore")) || 0;
+    timeLeft = parseInt(localStorage.getItem("currentTimeLeft")) || 90;
+
+    console.log(`✅ Game Loaded: Level ${getLevelName()}, Score: ${score}, Time Left: ${timeLeft} sec`);
+
+    // ✅ Immediately update UI to reflect the correct level
+    updateUI();
+
+    document.addEventListener("DOMContentLoaded", () => {
+        displayLevelButtons(); // ✅ Show the level buttons
+
+        // ✅ Reset Progress button logic
+        document.getElementById("reset-progress-btn").addEventListener("click", function () {
+            if (confirm("Are you sure you want to reset all progress? This cannot be undone!")) {
+                localStorage.clear();
+                sessionStorage.clear();
+                location.reload();
+            }
+        });
+
+        // ✅ Improve Mode button logic
+        const improveModeBtn = document.getElementById("improve-mode-btn");
+        const improveModeActive = sessionStorage.getItem("improveMode") === "true";
+
+        // ✅ Set initial button text
+        improveModeBtn.innerText = improveModeActive ? "Normal Mode" : "Improve Mode";
+
+        improveModeBtn.addEventListener("click", function () {
+            if (sessionStorage.getItem("improveMode") === "true") {
+                // 🔁 Turn OFF Improve Mode
+                sessionStorage.removeItem("improveMode");
+                sessionStorage.removeItem("currentLevel");
+                alert("✅ Switched to Normal Mode");
+                improveModeBtn.innerText = "Improve Mode";
+                window.location.href = "Home.html";
+            } else {
+                // 🔁 Turn ON Improve Mode
+                sessionStorage.setItem("improveMode", "true");
+                alert("✅ Improve Mode Enabled");
+                improveModeBtn.innerText = "Normal Mode";
+                window.location.href = "improvePlay.html";
+            }
+        });
+    });
+    document.addEventListener("DOMContentLoaded", () => {
+        displayLevelButtons();
+
+        const backToNormalBtn = document.getElementById("back-to-normal-btn");
+
+        if (sessionStorage.getItem("improveMode") === "true") {
+            backToNormalBtn.style.display = "inline-block";
+        }
+
+        backToNormalBtn.addEventListener("click", () => {
+            sessionStorage.setItem("improveMode", "false"); // ✅ Set to false instead of removing
+            sessionStorage.removeItem("currentLevel"); // Optional cleanup
+            console.log("🔁 Improve Mode turned OFF (set to false).");
+        });
+    });
+
+
+});
+
+
+
 
 
 

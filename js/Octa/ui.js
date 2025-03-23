@@ -1,4 +1,6 @@
 // ui.js - UI Updates and Feedback
+document.title = improveMode ? "MathMind - Improve Mode" : "MathMind";
+
 
 function displayFeedback(message, color) {
     const feedback = document.getElementById("feedback");
@@ -23,12 +25,20 @@ function displayFeedback(message, color) {
 }
 
 function updateUI() {
-    document.getElementById("score").innerText = `Score: ${score}`;
+    const improveMode = sessionStorage.getItem("improveMode") === "true";
+
+    // ✅ Dynamically update the tab title
+    document.title = improveMode ? "MathMind - Improve Mode" : "MathMind";
+
+    const scoreDisplay = document.getElementById("score");
+    scoreDisplay.innerText = improveMode
+        ? `Improve Score: ${improveScore}`
+        : `Score: ${score}`;
+
     document.getElementById("level").innerText = `Level: ${getLevelName()}`;
 
-    // ✅ Convert lives into hearts display
     const livesDisplay = document.getElementById("lives");
-    livesDisplay.innerHTML = "❤️".repeat(lives);  // Displays hearts based on lives
+    livesDisplay.innerHTML = "❤️".repeat(lives);
 }
 
 
@@ -74,4 +84,8 @@ function goBackToImprove() {
     console.log("Returning to Improve Mode menu...");
     window.location.href = "improvePlay.html"; // ✅ Keep Improve Mode active until Go Back is pressed
 }
+document.addEventListener("DOMContentLoaded", () => {
+    const improveMode = sessionStorage.getItem("improveMode") === "true";
+    document.title = improveMode ? "MathMind - Improve Mode" : "MathMind";
+});
 
