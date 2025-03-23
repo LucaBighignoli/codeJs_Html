@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathMind</title>
+    <link rel="stylesheet" href="css/octas.css">
+    <!-- Link to new split JS files -->
+    <script src="js/Octa/questions.js" defer></script>
+    <script src="js/Octa/timer.js" defer></script>
+    <script src="js/Octa/ui.js" defer></script>
+    <script src="js/Octa/main.js" defer></script>
+</head>
+<body>
+
+<header>
+    <button onclick="goBack()">⬅ Go Back</button>
+    <h1>MathMind</h1>
+    <h2 id="timer">Time Left: 1:30</h2>
+</header>
+
+<div id="status-bar">
+    <p id="lives">❤️❤️❤️</p> <!-- ✅ Starts with 3 hearts -->
+    <p id="score">Score: 0</p>
+    <p id="level">Level: 1</p>
+</div>
+
+<!-- ✅ Ready container with new buttons -->
+<div id="ready-container">
+    <button id="start-button" onclick="startQuiz()">Loading...</button>
+    <br><br>
+    <button id="improve-mode-btn">Improve Mode</button>
+    <button id="reset-progress-btn">Reset All Progress</button>
+    <button id="back-to-normal-btn" style="display: none;">Back to Normal Play</button>
+
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const startButton = document.getElementById("start-button");
+        const improveModeBtn = document.getElementById("improve-mode-btn");
+        const backToNormalBtn = document.getElementById("back-to-normal-btn");
+
+        function updateImproveModeUI() {
+            const isImproveMode = sessionStorage.getItem("improveMode") === "true";
+
+            improveModeBtn.innerText = isImproveMode ? "Normal Mode" : "Improve Mode";
+            backToNormalBtn.style.display = isImproveMode ? "inline-block" : "none";
+            startButton.innerText = isImproveMode ? "Improve This Level" : "Resume Last Level";
+        }
+
+        improveModeBtn.addEventListener("click", function () {
+            sessionStorage.setItem("improveMode", "true");
+            window.location.href = "improvePlay.html"; // ✅ Keep this redirect
+        });
+
+        backToNormalBtn.addEventListener("click", function () {
+            sessionStorage.setItem("improveMode", "false");
+            sessionStorage.removeItem("currentLevel"); // Optional
+            alert("🔁 Switched back to Normal Play Mode");
+            updateImproveModeUI();
+        });
+
+        // Reset Progress
+        document.getElementById("reset-progress-btn").addEventListener("click", function () {
+            if (confirm("Are you sure you want to reset all progress? This cannot be undone!")) {
+                localStorage.clear();
+                sessionStorage.clear();
+                location.reload();
+            }
+        });
+
+        updateImproveModeUI(); // ✅ Call on load
+    });
+</script>
+
+<div id="quiz-container" style="display: none;">
+    <h2 id="question">Loading question...</h2>
+    <input type="text" id="answer-input" placeholder="Type your answer here" />
+    <button onclick="submitAnswer()">Submit</button>
+    <p id="feedback"></p>
+</div>
+
+<div id="final-score" style="display: none;">
+    <h2>Congratulations!</h2>
+    <p id="score-display"></p>
+</div>
+
+</body>
+</html>

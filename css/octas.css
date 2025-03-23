@@ -1,0 +1,95 @@
+/* 🌌 Gradient Background */
+body {
+    background: linear-gradient(135deg, #3a1c71, #6a3093, #1e3c72);
+    color: white;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+}
+
+/* ✅ Style Headers */
+h1, h2 {
+    color: #d1c4e9; /* Soft lavender */
+}
+
+/* 🎮 Status Bar */
+#status-bar {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 1.2em;
+}
+
+/* 💙 Buttons */
+button {
+    background: linear-gradient(45deg, #4a148c, #311b92);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+button:hover {
+    background: linear-gradient(45deg, #5e35b1, #4527a0);
+    transform: scale(1.05);
+}
+
+/* ✅ Input Field */
+#answer-input {
+    border: 2px solid #9c27b0;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 18px;
+}
+
+/* 🎭 Feedback Messages */
+#feedback {
+    font-size: 1.2em;
+    margin-top: 10px;
+}
+
+/* ✅ Hearts (Lives) */
+#lives {
+    font-size: 24px;
+    letter-spacing: 5px;
+    color: red; /* Keeps hearts red for clear visibility */
+}
+
+/* 💡 Flash Animation for Correct Answer */
+.correct-anim {
+    animation: flash-blue 0.6s ease-in-out;
+}
+
+@keyframes flash-blue {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(0, 150, 255, 0.4); }
+    100% { background-color: transparent; }
+}
+
+/* 🔴 Shake Animation for Incorrect Answer */
+.incorrect-anim {
+    animation: shake 0.6s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+}
+
+/* ✅ Final Score Screen */
+#final-score {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+}
