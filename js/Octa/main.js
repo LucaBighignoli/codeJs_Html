@@ -21,7 +21,6 @@ if (!improveMode) {
 // Reset game state
 function resetGame() {
     timeLeft = 90;
-    score = 0;
     lives = 3;
     timerEnabled = !improveMode;
     updateUI();
@@ -228,18 +227,55 @@ function improveLevel() {
     sessionStorage.setItem("currentLevel", currentLevelName);
 
     console.log("🚀 Improve Mode is now set to:", sessionStorage.getItem("improveMode"));
-    window.location.href = "improvePlay.html";  // ✅ RedH
+    window.location.href = "improvePlay.html";  // ✅ Redirect to Improve Play
+}
+function goBack() {
+    console.log("⬅️ Go Back button pressed...");
+
+    clearInterval(timerInterval); // ✅ Stop the timer immediately
+
+    // ✅ Round down to nearest multiple of 15
+    if (score % 15 !== 0) {
+        score = Math.floor(score / 15) * 15;
+        localStorage.setItem("currentScore", score); // ✅ Save updated score
+        console.log(`🔁 Score rounded down to ${score}`);
+    }
+
+    // ✅ If the quiz is active, restart it instead of leaving
+    if (document.getElementById("quiz-container").style.display === "block") {
+        restartQuiz();  // ✅ Calls restartQuiz() to avoid repeated code
+    } else {
+        console.log("🏠 Returning to main menu...");
+        window.location.href = "Home.html";  // ✅ Default behavior for menus
+    }
+}
+
+function restartQuiz() {
+    console.log("🔄 Restarting quiz...");
+
+    clearInterval(timerInterval); // ✅ Stop the timer
+    inQuiz = false;
 
     const isImproveMode = sessionStorage.getItem("improveMode") === "true";
 
     if (isImproveMode) {
         console.log("🚀 Improve Mode active — redirecting to improvePlay.html...");
-        window.location.href = "improvePlay.html"; // ✅ Redirect to level selector
+        window.location.href = "improvePlay.html"; // ✅ Go to level selector
         return;
     }
 
-    // Normal Mode restart logic
+    // ✅ Normal Mode restart
+    // Round down score to nearest multiple of 15
+    const originalScore = score;
+    score = Math.floor(score / 15) * 15;
+    localStorage.setItem("currentScore", score);
+    resetGame();
+
+    console.log(`🎯 Score adjusted: ${originalScore} ➡ ${score}`);
+
+    // Reset view to ready screen
     document.getElementById("quiz-container").style.display = "none";
+    document.getElementById("final-score").style.display = "none";
     document.getElementById("ready-container").style.display = "block";
     document.getElementById("score").innerText = `Score: ${score}`;
 
@@ -320,7 +356,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 sessionStorage.removeItem("currentLevel");
                 alert("✅ Switched to Normal Mode");
                 improveModeBtn.innerText = "Improve Mode";
-                window.location.href = "index.html";
+                window.location.href = "Home.html";
             } else {
                 // 🔁 Turn ON Improve Mode
                 sessionStorage.setItem("improveMode", "true");
