@@ -65,9 +65,9 @@ for op in operations:
 
             elif op == "Multiplication":
                 if diff == "Easy":
-                    a, b = random.randint(2, 12), random.randint(2, 12)
+                    a, b = random.randint(2, 10), random.randint(2, 10)
                 elif diff == "Medium":
-                    a, b = random.randint(13, 21), random.randint(13, 21)
+                    a, b = random.randint(11, 21), random.randint(11, 21)
                 elif diff == "Difficult":
                     a, b = random.randint(23, 35), random.randint(23, 35)
                 answer = a * b
