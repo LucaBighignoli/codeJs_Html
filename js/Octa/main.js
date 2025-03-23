@@ -228,34 +228,7 @@ function improveLevel() {
     sessionStorage.setItem("currentLevel", currentLevelName);
 
     console.log("🚀 Improve Mode is now set to:", sessionStorage.getItem("improveMode"));
-    window.location.href = "improvePlay.html";  // ✅ Redirect to Improve Play
-}
-function goBack() {
-    console.log("⬅️ Go Back button pressed...");
-
-    clearInterval(timerInterval); // ✅ Stop the timer immediately
-
-    // ✅ Round down to nearest multiple of 15
-    if (score % 15 !== 0) {
-        score = Math.floor(score / 15) * 15;
-        localStorage.setItem("currentScore", score); // ✅ Save updated score
-        console.log(`🔁 Score rounded down to ${score}`);
-    }
-
-    // ✅ If the quiz is active, restart it instead of leaving
-    if (document.getElementById("quiz-container").style.display === "block") {
-        restartQuiz();  // ✅ Calls restartQuiz() to avoid repeated code
-    } else {
-        console.log("🏠 Returning to main menu...");
-        window.location.href = "Home.html";  // ✅ Default behavior for menus
-    }
-}
-
-function restartQuiz() {
-    console.log("🔄 Restarting quiz...");
-
-    clearInterval(timerInterval); // ✅ Stop the timer immediately
-    inQuiz = false;
+    window.location.href = "improvePlay.html";  // ✅ RedH
 
     const isImproveMode = sessionStorage.getItem("improveMode") === "true";
 
@@ -347,7 +320,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 sessionStorage.removeItem("currentLevel");
                 alert("✅ Switched to Normal Mode");
                 improveModeBtn.innerText = "Improve Mode";
-                window.location.href = "Home.html";
+                window.location.href = "index.html";
             } else {
                 // 🔁 Turn ON Improve Mode
                 sessionStorage.setItem("improveMode", "true");

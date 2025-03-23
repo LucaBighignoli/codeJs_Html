@@ -26,7 +26,7 @@ function startLevel(level) {
 // Go back to the main menu
 function goBack() {
     localStorage.removeItem("improveMode");
-    window.location.href = "Home.html";
+    window.location.href = "index.html";
 }
 
 // Display level buttons based on reached levels
