@@ -246,7 +246,7 @@ function goBack() {
         restartQuiz();  // ✅ Calls restartQuiz() to avoid repeated code
     } else {
         console.log("🏠 Returning to main menu...");
-        window.location.href = "Home.html";  // ✅ Default behavior for menus
+        window.location.href = "index.html";  // ✅ Default behavior for menus
     }
 }
 
@@ -356,7 +356,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 sessionStorage.removeItem("currentLevel");
                 alert("✅ Switched to Normal Mode");
                 improveModeBtn.innerText = "Improve Mode";
-                window.location.href = "Home.html";
+                window.location.href = "index.html";
             } else {
                 // 🔁 Turn ON Improve Mode
                 sessionStorage.setItem("improveMode", "true");
