@@ -361,7 +361,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 // 🔁 Turn ON Improve Mode
                 sessionStorage.setItem("improveMode", "true");
                 alert("✅ Improve Mode Enabled");
-                improveModeBtn.innerText = "Normal Mode";
                 window.location.href = "improvePlay.html";
             }
         });
